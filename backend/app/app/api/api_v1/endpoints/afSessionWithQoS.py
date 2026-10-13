@@ -125,11 +125,6 @@ async def create_subscription(
             status_code=400, detail="The self attribute must not be set"
         )
 
-    if item_in.dnn is not None or item_in.snssai is not None:
-        raise HTTPException(
-            status_code=400, detail="The dnn ans snssai attributes are not supported"
-        )
-
     validate_subscription(item_in)
 
     # Retrieve UE using the selected identifier
@@ -576,6 +571,9 @@ async def alter_qos_task(
 
     try:
         await driver.change_qos(subscription, ues, qos_profile)
+        if driver.notifies_asynchronously:
+            # The driver reports the outcome itself once the change is applied (for huawei)
+            return
         events.append(
             schemas.UserPlaneEventReport(
                 event=schemas.UserPlaneEvent.SUCCESSFUL_RESOURCES_ALLOCATION

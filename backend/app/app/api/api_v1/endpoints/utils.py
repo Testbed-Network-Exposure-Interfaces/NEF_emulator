@@ -123,7 +123,7 @@ def get_test(
 
 @router.post("/session-with-qos/callback")
 def create_item(item: UserPlaneNotificationData, request: Request):
-
+    print("ITEM AS SESSION WITH QOS", item)
     http_response = JSONResponse(content={'ack' : 'TRUE'}, status_code=200)
     add_notifications(request, http_response, True)
     return http_response 
