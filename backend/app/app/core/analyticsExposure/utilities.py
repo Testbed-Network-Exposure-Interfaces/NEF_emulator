@@ -23,7 +23,7 @@ def bps_to_xbps_bitrate(bitrate_value: str) -> BitRate:
 async def send_notification(notif_uri: str, json: Any, *, subscription_id: str, event: str) -> bool:
     try:
         await notification_responder.send_notification(notif_uri, json)
-        logger.info("Notification sent [sub=%s, event=%s] to %s", subscription_id, event, notif_uri)
+        # logger.info("Notification sent [sub=%s, event=%s] to %s", subscription_id, event, notif_uri)
         return True
     except Exception as e:
         logger.error("Error sending notification [sub=%s, event=%s]: %s", subscription_id, event, e)

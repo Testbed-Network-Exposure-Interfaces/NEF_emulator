@@ -238,7 +238,7 @@ class WlanPerformanceHandler(AnalyticsHandler):
             wlanPerUeIdInfos=wlan_per_ue,
         )]
         sorted_infos = self._sort(wlan_infos)
-        logger.info("%s: built %d wlan entries", self.analytics_id, len(sorted_infos))
+        # logger.info("%s: built %d wlan entries", self.analytics_id, len(sorted_infos))
         return sorted_infos
 
     @override

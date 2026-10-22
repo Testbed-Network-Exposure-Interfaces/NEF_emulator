@@ -65,7 +65,7 @@ class SubscriptionAnalyticsPoller:
         poll_state = _PollerState(next_poll_time=loop.time())
 
         while True:
-            logger.info("id=%s|notifId=%s: polling", subscription_id, subscription.notifId)
+            # logger.info("id=%s|notifId=%s: polling", subscription_id, subscription.notifId)
 
             if db_event.is_set():
                 subscription = self._load_subscription(db_mongo, subscription_id)
@@ -81,7 +81,7 @@ class SubscriptionAnalyticsPoller:
                 return
 
             notifs = await self._collect_event_notifs(db_sql, subscription)
-            logger.info("id=%s|notifId=%s: collected %d notifs", subscription_id, subscription.notifId, len(notifs))
+            # logger.info("id=%s|notifId=%s: collected %d notifs", subscription_id, subscription.notifId, len(notifs))
             if notifs:
                 report = AnalyticsEventNotification(
                     notifId=subscription.notifId,

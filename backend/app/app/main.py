@@ -38,8 +38,10 @@ nefapi.add_exception_handler(HTTPException, problem_details_http_handler)
 
 # Only the northbound APIs are published to CAPIF, so only their invocations can
 # be logged there - and only they carry a CAPIF-issued token.
-if settings.CAPIF_ENABLED:
-    nefapi.add_middleware(CAPIFLoggingMiddleware)
+# CAPIF invocation logging disabled: the logging feature is still set up in
+# CapifProvider, but it is no longer wired into the northbound app.
+# if settings.CAPIF_ENABLED:
+#     nefapi.add_middleware(CAPIFLoggingMiddleware)
 
 app.mount("/nef", nefapi)
 

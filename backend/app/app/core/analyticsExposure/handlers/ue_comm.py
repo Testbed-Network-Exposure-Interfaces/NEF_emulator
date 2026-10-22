@@ -223,7 +223,7 @@ class UeCommHandler(AnalyticsHandler):
             ue_comm_infos.append(ue_comm)
 
         sorted_infos = self._sort(ue_comm_infos)
-        logger.info("%s: built %d UE comm entries", self.analytics_id, len(sorted_infos))
+        # logger.info("%s: built %d UE comm entries", self.analytics_id, len(sorted_infos))
         return sorted_infos or None
 
     @staticmethod

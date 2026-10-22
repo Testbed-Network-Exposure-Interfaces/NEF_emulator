@@ -14,7 +14,7 @@ spec:
     helm:
       parameters:
         - name: backend.deployment.image
-          value: "ghcr.io/migas77/backend:0.0.2"
+          value: "ghcr.io/migas77/backend:0.0.4"
         - name: capif.enabled
           value: "%s"
   destination:

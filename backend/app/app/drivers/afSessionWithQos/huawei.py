@@ -81,24 +81,30 @@ class HuaweiAfSessionWithQos(AfSessionWithQosInterface):
         ambrup: int | None,
         ambrdl: int | None,
         notify: bool,
+        ambr_from_association: bool = False,
     ) -> None:
         dnn = subscription.dnn or ue.dnn or self.default_slice_dnn
         snssai = subscription.snssai
         association = await self._get_slice_association(dnn, snssai, ue)
 
         if association is not None:
-            # Slice exists -> patch slice
+            # Slice exists -> patch the UE's own QoS for that slice association (AMBR), leaving the slice untouched
             slice_id = association["slice_id"]
-            logging.debug("Patching slice %s of UE %s", slice_id, ue.supi)
+            if ambr_from_association:
+                # Prefer the AMBR configured on the association, using the given values as fallback
+                ambrup = association.get("uplink_aggregate_maximum_bitrate_kbps", ambrup)
+                ambrdl = association.get("downlink_aggregate_maximum_bitrate_kbps", ambrdl)
+            logging.debug("Patching QoS of UE %s (slice %s)", ue.supi, slice_id)
             payload: dict = {
-                "uplink_maximum_bitrate_per_ue_kbps": ambrup,
-                "downlink_maximum_bitrate_per_ue_kbps": ambrdl,
+                "uplink_aggregate_maximum_bitrate_kbps": ambrup,
+                "downlink_aggregate_maximum_bitrate_kbps": ambrdl,
+                "slice_id": slice_id,
             }
-            benchmark_resource = "Patch slice QoS"
+            benchmark_resource = "Patch UE QoS"
             benchmark_op = "PATCH"
             start_ns = time.perf_counter_ns()
             res = await self.httpx_client.patch(
-                f"/core/slices/{slice_id}",
+                f"/core/ues/{ue.supi}/qos",
                 json={k: v for k, v in payload.items() if v is not None},
             )
             elapsed_ns = time.perf_counter_ns() - start_ns
@@ -237,7 +243,13 @@ class HuaweiAfSessionWithQos(AfSessionWithQosInterface):
         self, subscription: AsSessionWithQoSSubscription, ues: List[UE]
     ) -> None:
         for ue in ues:
+            # Revert to the AMBR of the UE's slice association, with the NEF defaults as fallback.
             # The endpoint doesn't notify on revert, so only log the outcome
             await self._change_ue_qos(
-                subscription, ue, self.default_ambrup, self.default_ambrdl, notify=False
+                subscription,
+                ue,
+                self.default_ambrup,
+                self.default_ambrdl,
+                notify=False,
+                ambr_from_association=True,
             )

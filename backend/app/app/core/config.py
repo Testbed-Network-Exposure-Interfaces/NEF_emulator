@@ -74,6 +74,11 @@ class QoSInterfaceSettings(BaseModel):
     huwaei_api_password: str = ""
     huwaei_default_ambrup: int = 0
     huwaei_default_ambrdl: int = 0
+    huwaei_default_slice_dnn: str = "embb"
+    huwaei_default_slice_sst: int = 1
+    huwaei_default_start_sd: int = 102030
+    # Seconds between polls of an asynchronous Slice Manager operation
+    huwaei_operation_poll_interval: float = 2.0
 
     @validator(
         "huwaei_api_url",

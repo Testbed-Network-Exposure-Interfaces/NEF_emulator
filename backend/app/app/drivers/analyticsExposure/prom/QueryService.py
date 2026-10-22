@@ -1,4 +1,5 @@
 import logging
+import time
 
 import httpx
 from datetime import datetime, timedelta
@@ -78,10 +79,14 @@ class PromQueryService(QueryServiceInterface):
         query_str = builder.build()
         logger.debug("Prometheus Query Range: %s from %s to %s with step %s", query_str, start, end, step)
 
-        resp = await self.__httpx_client.get("/api/v1/query_range", params={
+        params = {
             "query": query_str, "start": start.timestamp(), "end": end.timestamp(),
             "step": timedelta_to_prom_duration(step)
-        }, timeout=request_timeout)
+        }
+
+        start_ns = time.perf_counter_ns()
+        resp = await self.__httpx_client.get("/api/v1/query_range", params=params, timeout=request_timeout)
+        elapsed_ns = time.perf_counter_ns() - start_ns
 
         if resp.status_code != 200:
             logger.critical("Error while querying Prometheus (status code: %d): %s", resp.status_code, resp.text)

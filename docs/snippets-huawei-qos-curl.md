@@ -12,7 +12,7 @@ These snippets drive the `huwaei` QoS backend
 
 ```bash
 QOS__BACKEND=huwaei
-QOS__HUWAEI_API_URL=http://10.16.255.54:8000
+QOS__HUWAEI_API_URL=http://10.16.255.55:8000
 QOS__HUWAEI_API_USER=notneeded
 QOS__HUWAEI_API_PASSWORD=notneeded
 QOS__HUWAEI_DEFAULT_AMBRUP=50000   # kbps, applied when the subscription is deleted
@@ -91,6 +91,24 @@ trailing ID:
 
 ```bash
 SUB_ID=<subscription id>
+```
+
+## Get subscriptions
+
+List all subscriptions. This returns every AsSessionWithQoS subscription owned
+by the logged-in user, whatever the `scsAsId` in the path. You can also read
+`SUB_ID` from the `self` field here.
+
+```bash
+curl -s "$NEF/nef/api/v1/3gpp-as-session-with-qos/v1/myNetapp/subscriptions" \
+  -H "Authorization: Bearer $TOKEN" | jq
+```
+
+Get one subscription by ID:
+
+```bash
+curl -s "$NEF/nef/api/v1/3gpp-as-session-with-qos/v1/myNetapp/subscriptions/$SUB_ID" \
+  -H "Authorization: Bearer $TOKEN" | jq
 ```
 
 ## Change QoS
