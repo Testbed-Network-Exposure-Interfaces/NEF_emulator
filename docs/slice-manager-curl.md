@@ -6,7 +6,7 @@ curl -i -X POST \
   http://10.16.255.55:8000/core/slices \
   -H 'Content-Type: application/json' \
   -d '{
-    "slice_id": "embb-slice",
+    "slice_id": "embb",
     "coverage_area": [
       "it"
     ],
@@ -59,7 +59,7 @@ curl -i -X POST \
   http://10.16.255.55:8000/core/ues/999080100001127/slice-associations \
   -H 'Content-Type: application/json' \
   -d '{
-    "slice_id": "embb-slice",
+    "slice_id": "embb",
     "snssai": "1-020202",
     "dnn": "embb",
     "static_ipv4_address": "10.16.9.5",
@@ -68,10 +68,22 @@ curl -i -X POST \
     "downlink_aggregate_maximum_bitrate_kbps": 3000
   }'
 ```
+
+### PATCH UE QoS
+```bash
+curl -i -X PATCH \
+  'http://10.16.255.55:8000/core/ues/999080100001127/qos' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "uplink_aggregate_maximum_bitrate_kbps": 20000,
+    "downlink_aggregate_maximum_bitrate_kbps": 20000,
+    "slice_id": "embb"
+  }'
+```
   
 ### GET ALL ASSOCIATIONS FOR A SLICE
 ```md
-curl -i -X GET 'http://10.16.255.55:8000/core/slices/embb-slice/ues'
+curl -i -X GET 'http://10.16.255.55:8000/core/slices/embb/ues'
 ```
 
 ### GET ALL ASSOCIATIONS FOR A UE
@@ -91,12 +103,12 @@ curl -i -X GET 'http://10.16.255.55:8000/core/ues/999080100001127/user-plane-inf
 
 ### DELETE UE SLICE ASSOCIATION
 ```md
-curl -i -X DELETE 'http://10.16.255.55:8000/core/ues/999080100001127/slice-associations/embb-slice'
+curl -i -X DELETE 'http://10.16.255.55:8000/core/ues/999080100001127/slice-associations/embb'
 ```
 
 ### DELETE SLICE
 ```md
-curl -i -X DELETE 'http://10.16.255.55:8000/core/slices/embb-slice'
+curl -i -X DELETE 'http://10.16.255.55:8000/core/slices/embb'
 ```
 
 ### OLD N6 PROTECTION

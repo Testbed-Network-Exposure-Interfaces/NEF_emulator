@@ -71,6 +71,9 @@ spec:
             value: mongodb://{{ .Release.Name }}-{{ .Values.mongo.name }}:{{ index .Values.mongo.service.ports 0 "port" }}/
           - name: RABBITMQ_HOST
             value: {{ .Release.Name }}-{{ .Values.rabbitmq.name }}
+          {{- with .Values.backend.extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
         envFrom:
         - secretRef:
             name: {{ .Release.Name }}-{{ .Values.secretsName }}

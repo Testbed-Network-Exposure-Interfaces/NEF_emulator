@@ -106,6 +106,8 @@ backend:
     image: ghcr.io/migas77/backend:latest
     ports:
       - containerPort: 80
+  # Extra environment variables for the backend container (e.g. QOS__* for the Slice Manager QoS backend)
+  extraEnv: []
   service:
     type: LoadBalancer
     ports:
