@@ -5,6 +5,7 @@ from .ue_movement import router
 from .paths import router
 from .gNB import router
 from .Cell import router
+from .UEGroups import router
 from .UE import router
 from .qosInformation import router
 from .afSessionWithQoS import router
@@ -21,3 +22,5 @@ from .analyticsExposure import router
 from .broker import router
 from .tests import router
 from .scenario import router
+from .application import router
+from .sms import router

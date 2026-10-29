@@ -3,6 +3,11 @@ from fastapi import APIRouter
 from app.api.api_v1 import endpoints
 
 api_router = APIRouter()
+
+@api_router.get("/health", tags=["Health"])
+async def health_check():
+    return {"status": "ok"}
+
 api_router.include_router(endpoints.login.router, tags=["login"])
 api_router.include_router(endpoints.users.router, prefix="/users", tags=["users"])
 api_router.include_router(endpoints.utils.router, prefix="/utils", tags=["UI"])
@@ -11,8 +16,11 @@ api_router.include_router(endpoints.ue_movement.router, prefix="/ue_movement", t
 api_router.include_router(endpoints.paths.router, prefix="/paths", tags=["Paths"])
 api_router.include_router(endpoints.gNB.router, prefix="/gNBs", tags=["gNBs"])
 api_router.include_router(endpoints.Cell.router, prefix="/Cells", tags=["Cells"])
+api_router.include_router(endpoints.UEGroups.router, prefix="/UEGroups", tags=["UEGroups"])
 api_router.include_router(endpoints.UE.router, prefix="/UEs", tags=["UEs"])
 api_router.include_router(endpoints.qosInformation.router, prefix="/qosInfo", tags=["QoS Information"])
+api_router.include_router(endpoints.application.router, prefix="/applications", tags=["Applications"])
+api_router.include_router(endpoints.sms.router, prefix="/sms", tags=["SMS"])
 
 
     # ---Create a subapp---

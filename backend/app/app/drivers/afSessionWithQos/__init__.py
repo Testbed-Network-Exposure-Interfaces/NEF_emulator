@@ -13,6 +13,10 @@ if settings.qos.backend == QoSInterfaceBackend.HUWAEI:
         settings.qos.huwaei_api_url,
         settings.qos.huwaei_default_ambrup,
         settings.qos.huwaei_default_ambrdl,
+        settings.qos.huwaei_default_slice_dnn,
+        settings.qos.huwaei_default_slice_sst,
+        settings.qos.huwaei_default_start_sd,
+        settings.qos.huwaei_operation_poll_interval,
         settings.qos.huwaei_api_user,
         settings.qos.huwaei_api_password,
     )

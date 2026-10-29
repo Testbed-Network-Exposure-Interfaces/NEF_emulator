@@ -12,9 +12,53 @@ from pydantic import (
     Field,
     HttpUrl,
     PostgresDsn,
+    confloat,
+    conint,
     parse_obj_as,
     validator,
 )
+
+
+class AnalyticsExposureBackend(Enum):
+    STUB = "stub"
+    PROMETHEUS = "prometheus"
+
+
+class AnalyticsExposureInterfaceSettings(BaseModel):
+    backend: AnalyticsExposureBackend = AnalyticsExposureBackend.STUB
+    url: str = ""
+    poll_interval: confloat(gt=0) = 10.0
+    temporal_gran_size: conint(ge=1) = 60
+    offset_period: Optional[conint(le=-1)] = None
+
+    @validator("url", always=True)
+    def validate_url(cls, v, values):
+        if not v and values["backend"] == AnalyticsExposureBackend.PROMETHEUS:
+            raise ValueError("url must be set when prometheus analytics exposure backend is in use")
+        return v
+
+    @validator("offset_period", always=True)
+    def default_offset_period(cls, v, values):
+        if v is None:
+            return -values.get("temporal_gran_size", 60)
+        return v
+
+
+class SMSBackend(Enum):
+    MOCK = "mock"
+    SMSC = "smsc"
+
+
+class SMSInterfaceSettings(BaseModel):
+    backend: SMSBackend = SMSBackend.MOCK
+    smsc_url: str = ""
+    sender_id: str = ""
+
+    @validator("smsc_url", "sender_id", always=True)
+    def validate_smsc_set(cls, v, field, values):
+        if not v and values.get("backend") == SMSBackend.SMSC:
+            raise ValueError(f"{field.name} must be set when smsc SMS backend is in use")
+        return v
 
 
 class QoSInterfaceBackend(Enum):
@@ -30,6 +74,11 @@ class QoSInterfaceSettings(BaseModel):
     huwaei_api_password: str = ""
     huwaei_default_ambrup: int = 0
     huwaei_default_ambrdl: int = 0
+    huwaei_default_slice_dnn: str = "embb"
+    huwaei_default_slice_sst: int = 1
+    huwaei_default_start_sd: int = 102030
+    # Seconds between polls of an asynchronous Slice Manager operation
+    huwaei_operation_poll_interval: float = 2.0
 
     @validator(
         "huwaei_api_url",
@@ -95,9 +144,35 @@ class Settings(BaseSettings):
         )
 
     # MONGO_CLIENT: str
-    # CAPIF_HOST: str
-    # CAPIF_HTTP_PORT: str
-    # CAPIF_HTTPS_PORT: str
+
+    NGINX_HOST: str
+    NGINX_HTTPS: str
+
+    # CAPIF settings (required when CAPIF_ENABLED=True)
+    CAPIF_ENABLED: bool = False
+    CAPIF_CLEANUP_ON_SHUTDOWN: bool = False
+    CAPIF_HOST: Optional[str] = None
+    REGISTER_HOST: Optional[str] = None
+    CAPIF_HTTPS_PORT: Optional[str] = None
+    CAPIF_REGISTER_PORT: Optional[str] = None
+    CAPIF_USERNAME: Optional[str] = None
+    CAPIF_PASSWORD: Optional[str] = None
+
+    @validator(
+        "CAPIF_HOST",
+        "REGISTER_HOST",
+        "CAPIF_HTTPS_PORT",
+        "CAPIF_REGISTER_PORT",
+        "CAPIF_USERNAME",
+        "CAPIF_PASSWORD",
+        always=True,
+    )
+    def validate_capif_settings(cls, v, field, values):
+        if not v and values.get("CAPIF_ENABLED"):
+            raise ValueError(
+                f"{field.name} must be set when CAPIF_ENABLED is true"
+            )
+        return v
 
     SMTP_TLS: bool = True
     SMTP_PORT: Optional[int] = None
@@ -133,6 +208,8 @@ class Settings(BaseSettings):
     REPORT_PATH: str
 
     qos: QoSInterfaceSettings = QoSInterfaceSettings()
+    analyticsExposure: AnalyticsExposureInterfaceSettings = AnalyticsExposureInterfaceSettings()
+    sms: SMSInterfaceSettings = SMSInterfaceSettings()
 
     class Config:
         # case_sensitive = True

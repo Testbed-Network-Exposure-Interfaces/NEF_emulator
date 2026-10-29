@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nef-emulator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: oci://ghcr.io/migas77/nef-emulator
+    chart: nef-emulator
+    targetRevision: "0.0.6"
+    helm:
+      parameters:
+        - name: backend.deployment.image
+          value: "ghcr.io/migas77/backend:0.0.7"
+        - name: capif.enabled
+          value: "%s"
+      values: |
+        backend:
+          # Slice Manager (huawei) QoS backend for AsSessionWithQoS
+          extraEnv:
+            - name: QOS__BACKEND
+              value: "huwaei"
+            - name: QOS__HUWAEI_API_URL
+              value: "http://10.16.255.55:8000"
+            - name: QOS__HUWAEI_API_USER
+              value: "notneeded"
+            - name: QOS__HUWAEI_API_PASSWORD
+              value: "notneeded"
+            - name: QOS__HUWAEI_DEFAULT_AMBRUP
+              value: "50000"
+            - name: QOS__HUWAEI_DEFAULT_AMBRDL
+              value: "50000"
+            # Prometheus analytics backend for AnalyticsExposure (slice-monitoring Prometheus, in-cluster)
+            - name: ANALYTICSEXPOSURE__BACKEND
+              value: "prometheus"
+            - name: ANALYTICSEXPOSURE__URL
+              value: "http://prometheus.slice-monitoring.svc.cluster.local:9090"
+            - name: ANALYTICSEXPOSURE__POLL_INTERVAL
+              value: "10"
+            - name: ANALYTICSEXPOSURE__TEMPORAL_GRAN_SIZE
+              value: "60"
+            - name: ANALYTICSEXPOSURE__OFFSET_PERIOD
+              value: "-60"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nef
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

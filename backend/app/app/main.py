@@ -1,6 +1,10 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from starlette.middleware.cors import CORSMiddleware
 from app.api.api_v1.api import api_router, nef_router, tests_router
+from app.api.deps import verify_with_capif_public_key_if_enabled
+from app.api.exception_handlers import problem_details_http_handler
+from app.capif.logging import CAPIFLoggingMiddleware
+from app.capif.provider import capif_provider
 from app.core.config import settings
 import time
 
@@ -28,8 +32,17 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # ================================= Sub Application - Northbound APIs =================================
 
-nefapi = FastAPI(title="Northbound APIs")
+nefapi = FastAPI(title="Northbound APIs", dependencies=[Depends(verify_with_capif_public_key_if_enabled)])
 nefapi.include_router(nef_router, prefix=settings.API_V1_STR)
+nefapi.add_exception_handler(HTTPException, problem_details_http_handler)
+
+# Only the northbound APIs are published to CAPIF, so only their invocations can
+# be logged there - and only they carry a CAPIF-issued token.
+# CAPIF invocation logging disabled: the logging feature is still set up in
+# CapifProvider, but it is no longer wired into the northbound app.
+# if settings.CAPIF_ENABLED:
+#     nefapi.add_middleware(CAPIFLoggingMiddleware)
+
 app.mount("/nef", nefapi)
 
 #Middleware - add a custom header X-Process-Time containing the time in seconds that it took to process the request and generate a response
@@ -40,6 +53,14 @@ async def add_process_time_header(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
     return response
+
+# propagate startup events upwards
+for startup_event in nef_router.on_startup:
+    app.add_event_handler("startup", startup_event)
+
+if settings.CAPIF_ENABLED:
+    app.add_event_handler("startup", lambda: capif_provider.startup(nefapi, "/nef"))
+    app.add_event_handler("shutdown", capif_provider.shutdown)
 
 # ================================= Sub Application - Northbound APIs =================================
 

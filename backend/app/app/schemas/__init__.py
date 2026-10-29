@@ -4,6 +4,7 @@ from .token import Token, TokenPayload
 from .user import User, UserCreate, UserInDB, UserUpdate
 from .gNB import gNB, gNBCreate, gNBInDB, gNBUpdate
 from .Cell import Cell, CellCreate, CellInDB, CellUpdate
+from .UEGroups import ExternalGroupBase, ExternalGroup, ExternalGroupCreate, IMSIGroupBase, IMSIGroup, IMSIGroupCreate
 from .UE import UE, UECreate, UEUpdate, Speed, ue_path, UEhex
 from .commonData import (
     Snssai,
@@ -20,6 +21,8 @@ from .commonData import (
     PartitioningCriteria,
     NotificationFlag,
     WebsockNotifConfig,
+    InvalidParam,
+    ProblemDetails,
 )
 from .monitoringevent import (
     MonitoringEventSubscription,
@@ -52,10 +55,13 @@ from .niddConfigurationTrigger import (
     NiddConfigurationTriggerReply,
 )
 from .analyticsExposure import (
-    AnalyticsExposureSubscCreate,
+    AnalyticsExposureSubscUpsert,
     AnalyticsEventSubsc,
     AnalyticsExposureSubsc,
     AnalyticsEventNotification,
+    NotificationMethod,
+    EventReportingRequirement
 )
 from .utils import ExtraBaseModel
 from .scenario import scenario
+from .application import Application, ApplicationCreate, ApplicationUpdate, ApplicationInDB
